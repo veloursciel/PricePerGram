@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1gあたりの単価比較</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'メイリオ', 'Meiryo', '丸ゴシック', 'Yu Gothic Medium', 'Hiragino Maru Gothic ProN', sans-serif;
+            background-color: #667eea;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            min-height: 100vh;
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #4facfe;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .clear-btn {
+            background-color: #667eea;
+            color: #ffffff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'メイリオ', 'Meiryo', '丸ゴシック', 'Yu Gothic Medium', 'Hiragino Maru Gothic ProN', sans-serif;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .clear-btn:hover {
+            background-color: #4facfe;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .clear-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 20px;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+            table-layout: fixed;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        th {
+            background-color: #667eea;
+            color: #ffffff;
+            padding: 18px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            border-bottom: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            height: 50px;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        td {
+            padding: 0;
+            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            text-align: center;
+            height: 60px;
+            vertical-align: middle;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tbody tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+        
+        tbody tr:hover td {
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            height: 60px;
+            padding: 0 12px;
+            border: none;
+            font-size: 18px;
+            text-align: center;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            font-family: 'メイリオ', 'Meiryo', '丸ゴシック', sans-serif;
+            color: #2c3e50;
+            outline: none;
+            box-sizing: border-box;
+            display: block;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus {
+            background-color: rgba(102, 126, 234, 0.05);
+            color: #667eea;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .unit-price {
+            background: transparent;
+            font-weight: 600;
+            color: #000000;
+            font-size: 18px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 0 12px;
+        }
+
+        .unit-price.lowest {
+            background-color: #ff6b6b;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 8px;
+            margin: 4px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            th {
+                padding: 12px 8px;
+                font-size: 14px;
+                height: 44px;
+            }
+            
+            td {
+                height: 50px;
+            }
+            
+            input[type="number"] {
+                height: 50px;
+                padding: 0 8px;
+                font-size: 16px;
+            }
+            
+            .unit-price {
+                font-size: 16px;
+                height: 50px;
+                padding: 0 8px;
+            }
+            
+            .clear-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+        }
+
+        /* PC対応 */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 800px;
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            th {
+                padding: 20px 16px;
+                font-size: 18px;
+                height: 60px;
+            }
+            
+            td {
+                height: 70px;
+            }
+            
+            input[type="number"] {
+                height: 70px;
+                padding: 0 16px;
+                font-size: 20px;
+            }
+            
+            .unit-price {
+                font-size: 20px;
+                height: 70px;
+                padding: 0 16px;
+            }
+            
+            .clear-btn {
+                padding: 16px 32px;
+                font-size: 18px;
+            }
+            
+            table {
+                font-size: 18px;
+            }
+        }
+
+        @media (hover: hover) {
+            input[type="number"]:hover {
+                background-color: #f8f8f8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>1gあたりの単価比較</h1>
+        </header>
+        
+        <main>
+            <div class="table-container">
+                <table id="priceTable">
+                    <thead>
+                        <tr>
+                            <th>重さ (g)</th>
+                            <th>価格 (円)</th>
+                            <th>1gあたり (円/g)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="number" class="weight-input" placeholder="重さを入力"></td>
+                            <td><input type="number" class="price-input" placeholder="価格を入力"></td>
+                            <td class="unit-price">-</td>
+                        </tr>
+                        <tr>
+                            <td><input type="number" class="weight-input" placeholder="重さを入力"></td>
+                            <td><input type="number" class="price-input" placeholder="価格を入力"></td>
+                            <td class="unit-price">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="controls">
+                <button id="clearAllBtn" class="clear-btn">一括クリア</button>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.getElementById('priceTable');
+            const tbody = table.querySelector('tbody');
+
+            function calculateUnitPrice(row) {
+                const weightInput = row.querySelector('.weight-input');
+                const priceInput = row.querySelector('.price-input');
+                const unitPriceCell = row.querySelector('.unit-price');
+
+                const weight = parseFloat(weightInput.value);
+                const price = parseFloat(priceInput.value);
+
+                if (weight && price && weight > 0) {
+                    const unitPrice = price / weight;
+                    unitPriceCell.textContent = unitPrice.toFixed(2);
+                } else {
+                    unitPriceCell.textContent = '-';
+                }
+
+                highlightLowestPrice();
+            }
+
+            function highlightLowestPrice() {
+                const unitPriceCells = document.querySelectorAll('.unit-price');
+                let lowestPrice = Infinity;
+                let lowestCells = [];
+
+                unitPriceCells.forEach(cell => {
+                    cell.classList.remove('lowest');
+                    const price = parseFloat(cell.textContent);
+                    if (!isNaN(price)) {
+                        if (price < lowestPrice) {
+                            lowestPrice = price;
+                            lowestCells = [cell];
+                        } else if (price === lowestPrice) {
+                            lowestCells.push(cell);
+                        }
+                    }
+                });
+
+                if (lowestCells.length > 0 && lowestPrice !== Infinity) {
+                    lowestCells.forEach(cell => {
+                        cell.classList.add('lowest');
+                    });
+                }
+            }
+
+            function addNewRow() {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="number" class="weight-input" placeholder="重さを入力"></td>
+                    <td><input type="number" class="price-input" placeholder="価格を入力"></td>
+                    <td class="unit-price">-</td>
+                `;
+                
+                tbody.appendChild(newRow);
+                setupRowEventListeners(newRow);
+                
+                const firstInput = newRow.querySelector('.weight-input');
+                firstInput.focus();
+            }
+
+            function setupRowEventListeners(row) {
+                const weightInput = row.querySelector('.weight-input');
+                const priceInput = row.querySelector('.price-input');
+
+                weightInput.addEventListener('input', () => calculateUnitPrice(row));
+                priceInput.addEventListener('input', () => calculateUnitPrice(row));
+
+                weightInput.addEventListener('keydown', handleKeyNavigation);
+                priceInput.addEventListener('keydown', handleKeyNavigation);
+            }
+
+            function handleKeyNavigation(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    
+                    const currentInput = event.target;
+                    const currentRow = currentInput.closest('tr');
+                    const allRows = Array.from(tbody.querySelectorAll('tr'));
+                    const currentRowIndex = allRows.indexOf(currentRow);
+                    
+                    if (currentInput.classList.contains('weight-input')) {
+                        const priceInput = currentRow.querySelector('.price-input');
+                        priceInput.focus();
+                    } else if (currentInput.classList.contains('price-input')) {
+                        if (currentRowIndex < allRows.length - 1) {
+                            const nextRow = allRows[currentRowIndex + 1];
+                            const nextWeightInput = nextRow.querySelector('.weight-input');
+                            nextWeightInput.focus();
+                        } else {
+                            addNewRow();
+                        }
+                    }
+                }
+            }
+
+            function initializeTable() {
+                const existingRows = tbody.querySelectorAll('tr');
+                existingRows.forEach(row => {
+                    setupRowEventListeners(row);
+                });
+
+                const firstInput = tbody.querySelector('.weight-input');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }
+
+            function clearAll() {
+                // 全ての行を削除
+                tbody.innerHTML = '';
+                
+                // 初期の2行を追加
+                for (let i = 0; i < 2; i++) {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="number" class="weight-input" placeholder="重さを入力"></td>
+                        <td><input type="number" class="price-input" placeholder="価格を入力"></td>
+                        <td class="unit-price">-</td>
+                    `;
+                    tbody.appendChild(newRow);
+                    setupRowEventListeners(newRow);
+                }
+
+                const firstInput = tbody.querySelector('.weight-input');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }
+
+            document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+
+            initializeTable();
+        });
+    </script>
+</body>
+</html>
